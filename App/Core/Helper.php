@@ -34,4 +34,10 @@ class Helper
 
         return $scaped_values;
     }
+
+    public static function is_assoc(array $arr){
+        $keys = array_keys($arr);
+        return  $keys !== array_keys($keys);
+    }
+
 }
