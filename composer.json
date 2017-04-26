@@ -1,0 +1,17 @@
+{
+    "name": "vendetta/micro-framework",
+    "description": "Microframework php",
+    "type": "project",
+    "authors": [
+        {
+            "name": "Vendetta",
+            "email": "vendetta.olguin@gmail.com"
+        }
+    ],
+    "require": {},
+    "autoload":{
+        "psr-4": {
+            "MicroFramework\\": "app/"
+        }
+    }
+}
