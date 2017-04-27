@@ -43,7 +43,7 @@ class Model
     public static function insert(array $arr){
 
         $class      = get_called_class();
-        $instance   = new $class([]);
+        $instance   = new $class();
         
         echo $instance->make_insert($arr);
     }
