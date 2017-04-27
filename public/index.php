@@ -14,4 +14,5 @@ use MicroFramework\Models\Sample;
 
 $sample = new Sample(["description" => "wea"]);
 
+$sample->save();
 var_dump($sample);

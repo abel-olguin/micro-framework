@@ -25,7 +25,6 @@ class Model extends DB
 
         if(count($atts)){
             $this->set_attributes($atts);
-            $this->make_insert_query($this->attributes);
         }
 
     }
@@ -74,9 +73,18 @@ class Model extends DB
     }
 
     public function save(){
-    
-        echo $this->query;//run query
+        $this->make_insert_query($this->attributes);
+        $id         = $this->db_insert($this->query);
+        if(is_bool($id) === false){
+            $this->set_attribute("id",$id);
+        }elseif(!$id){
+            throw new FrameworkException("Error");
+            
+        }
+        
+        return $this;
     }
+
     /*-------------------------------------------------------------------------------------------------------------
      -
      -
@@ -89,7 +97,9 @@ class Model extends DB
 
         if(Helper::is_assoc($arr)){
             $keys   = $this->get_query_keys($arr);
+
             $values = $this->get_query_values($arr);
+
         }else{
             $greater_arr    = $this->get_greater_array($arr);
             $keys           = $this->get_query_keys($greater_arr);
@@ -202,8 +212,11 @@ class Model extends DB
     private function new_insert_instance($class,$arr){
         $instance   = new $class($arr);
         $id         = $instance->db_insert($instance->make_insert($arr));
-        $instance->set_attribute("id",$id);
-        return $instance;
+        if(is_bool($id) === false){
+            $instance->set_attribute("id",$id);
+            return $instance;
+        } 
+        return [];
     }
 
     private function get_greater_array($arr){
