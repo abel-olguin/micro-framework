@@ -16,6 +16,7 @@ class Helper
         $scaped_values = [];
 
         foreach ($arr as $value){
+
             switch (gettype($value)){
                 case "string":
                     $scaped_values[] = "'$value'";
@@ -25,6 +26,9 @@ class Helper
                     break;
                 case "double":
                     $scaped_values[] = $value;
+                    break;
+                case "NULL":
+                    $scaped_values[] = 'NULL';
                     break;
                 default:
                     $scaped_values[] = "'$value'";

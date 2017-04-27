@@ -10,7 +10,7 @@
 namespace MicroFramework\Core;
 
 
-class Model
+class Model extends DB
 {
     public $attributes  = [];
     private $query      = '';
@@ -18,15 +18,16 @@ class Model
 
     public function __construct(array $atts = [])
     {
+        parent::__construct();
         if(!(Helper::is_assoc($atts) || !count($atts))){
-            throw new \Exception('You can\'t put multiple records in constructor method, use insert method');
+            throw new FrameworkException('You can\'t put multiple records in constructor method, use insert method');
         }
 
         if(count($atts)){
             $this->set_attributes($atts);
             $this->make_insert_query($this->attributes);
         }
-       
+
     }
 
     public static function create(array $atts){
@@ -43,9 +44,9 @@ class Model
     public static function insert(array $arr){
 
         $class      = get_called_class();
-        $instance   = new $class([]);
-        
-        echo $instance->make_insert($arr);
+        $instance   = new $class();
+
+        $instance->excecute($instance->make_insert($arr));
     }
 
 
@@ -65,17 +66,22 @@ class Model
      }
 
      private function make_insert(array $arr){
-        $keys   = '';
-        $values = '';
 
         if(Helper::is_assoc($arr)){
             $keys   = $this->get_query_keys($arr);
             $values = $this->get_query_values($arr);
         }else{
-            $keys   = $this->get_query_keys($arr[0]);
-            $tmp    = [];
+            $greater_arr    = $this->get_greater_array($arr);
+            $keys           = $this->get_query_keys($greater_arr);
+            $tmp            = [];
+
             foreach ($arr as $attributes) {
-                $tmp[] = $this->get_query_values($attributes);
+                $prev = [];
+                foreach ($greater_arr as $key => $value) {
+                    $prev[] = isset($attributes[$key])?$attributes[$key]:null;
+                }
+
+                $tmp[] = $this->get_query_values($prev);
             }
             $values = implode(') , (', $tmp);
         }
@@ -167,9 +173,14 @@ class Model
         }
     }
 
+    private function get_greater_array($arr){
+        arsort($arr);
+
+        return array_values($arr)[0];
+    }
     private function get_query_keys(array $arr){
         return  implode(',',array_keys($arr));
-     }
+    }
 
      private function get_query_values(array $arr){
         return implode(',',Helper::get_scaped_values(array_values($arr)));
