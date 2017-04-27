@@ -10,7 +10,7 @@
 namespace MicroFramework\Core;
 
 
-class Model
+class Model extends DB
 {
     public $attributes  = [];
     private $query      = '';
@@ -18,15 +18,16 @@ class Model
 
     public function __construct(array $atts = [])
     {
+        parent::__construct();
         if(!(Helper::is_assoc($atts) || !count($atts))){
-            throw new \Exception('You can\'t put multiple records in constructor method, use insert method');
+            throw new FrameworkException('You can\'t put multiple records in constructor method, use insert method');
         }
 
         if(count($atts)){
             $this->set_attributes($atts);
             $this->make_insert_query($this->attributes);
         }
-       
+
     }
 
     public static function create(array $atts){
@@ -41,13 +42,36 @@ class Model
     }
 
     public static function insert(array $arr){
-
         $class      = get_called_class();
-        $instance   = new $class();
-        
-        echo $instance->make_insert($arr);
+
+        if(Helper::is_assoc($arr)){
+                
+                return self::new_insert_instance($class,$arr);
+        }else{
+            $instances = [];
+            foreach ($arr as $attributes) {
+                $instance = self::new_insert_instance($class,$attributes);
+                $instances[] = $instance;
+            }
+            return $instances;
+        }
+                    
     }
 
+    public static function insert_batch(array $arr){
+        $class      = get_called_class();
+
+        if(Helper::is_assoc($arr)){
+                
+            return false;
+        }else{
+            $instance   = new $class([]);
+            $response   = $instance->db_insert($instance->make_insert($arr));
+
+            return $response?true:false;
+        }
+                    
+    }
 
     public function save(){
     
@@ -60,22 +84,24 @@ class Model
      -
      -
      ---------------------------------------------------------------------------------------------------------------*/
-     private function make_insert_query(array $arr){
-        $this->query = $this->make_insert($arr);
-     }
 
      private function make_insert(array $arr){
-        $keys   = '';
-        $values = '';
 
         if(Helper::is_assoc($arr)){
             $keys   = $this->get_query_keys($arr);
             $values = $this->get_query_values($arr);
         }else{
-            $keys   = $this->get_query_keys($arr[0]);
-            $tmp    = [];
+            $greater_arr    = $this->get_greater_array($arr);
+            $keys           = $this->get_query_keys($greater_arr);
+            $tmp            = [];
+
             foreach ($arr as $attributes) {
-                $tmp[] = $this->get_query_values($attributes);
+                $prev = [];
+                foreach ($greater_arr as $key => $value) {
+                    $prev[] = isset($attributes[$key])?$attributes[$key]:null;
+                }
+
+                $tmp[] = $this->get_query_values($prev);
             }
             $values = implode(') , (', $tmp);
         }
@@ -146,20 +172,7 @@ class Model
         $this->attributes = $atts;
     }
 
-    /*-------------------------------------------------------------------------------------------------------------
-     -
-     -
-     -                                                Private methods
-     -
-     -
-     ---------------------------------------------------------------------------------------------------------------*/
-    protected function has_mutator($name){
-        return method_exists($this,$this->get_mutator($name));
-    }
 
-    protected function get_mutator($name){
-        return "get_".$name."_attribute";
-    }
 
     protected function get_attribute_value($name){
         if(array_key_exists($name,$this->attributes)){
@@ -167,9 +180,40 @@ class Model
         }
     }
 
+    /*-------------------------------------------------------------------------------------------------------------
+     -
+     -
+     -                                                Private methods
+     -
+     -
+     ---------------------------------------------------------------------------------------------------------------*/
+    private function has_mutator($name){
+        return method_exists($this,$this->get_mutator($name));
+    }
+
+    private function get_mutator($name){
+        return "get_".$name."_attribute";
+    }
+
+    private function make_insert_query(array $arr){
+        $this->query = $this->make_insert($arr);
+    }
+
+    private function new_insert_instance($class,$arr){
+        $instance   = new $class($arr);
+        $id         = $instance->db_insert($instance->make_insert($arr));
+        $instance->set_attribute("id",$id);
+        return $instance;
+    }
+
+    private function get_greater_array($arr){
+        arsort($arr);
+
+        return array_values($arr)[0];
+    }
     private function get_query_keys(array $arr){
         return  implode(',',array_keys($arr));
-     }
+    }
 
      private function get_query_values(array $arr){
         return implode(',',Helper::get_scaped_values(array_values($arr)));

@@ -7,10 +7,13 @@
  * The best ;)
  */
 
-namespace MicroFramework\Core;
+$GLOBALS["config"] = json_decode(file_get_contents(__DIR__.'/../Config/config.json'),true);
 
+function config($key,$default = null){
+    $config = $GLOBALS["config"];
+    if(isset($config[$key])){
+        return $config[$key];
+    }
 
-class Config
-{
-	
+    return $default;
 }
