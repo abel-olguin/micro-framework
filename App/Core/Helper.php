@@ -30,6 +30,9 @@ class Helper
                 case "NULL":
                     $scaped_values[] = 'NULL';
                     break;
+                case "boolean":
+                    $scaped_values[] = $value;
+                    break;
                 default:
                     $scaped_values[] = "'$value'";
                     break;
@@ -38,6 +41,7 @@ class Helper
 
         return $scaped_values;
     }
+
 
     public static function is_assoc(array $arr){
         $keys = array_keys($arr);

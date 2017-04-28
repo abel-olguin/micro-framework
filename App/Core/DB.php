@@ -23,6 +23,13 @@ class DB
     	$this->connection->close();
     }
 
+    protected function get_results($query){
+        if($result = $this->connection->query($query)) {
+
+            return $result->fetch_all(MYSQLI_ASSOC);
+        }
+    }
+
     protected function db_insert($query){
 
         if( $results = $this->connection->query($query)){
