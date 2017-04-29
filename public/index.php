@@ -12,6 +12,6 @@ require_once(__DIR__ . '/../vendor/autoload.php');
 
 use MicroFramework\Models\Sample;
 
-$wea = Sample::where(["id",7])->get();
+$wea = Sample::first();
 
 var_dump($wea);

@@ -20,8 +20,18 @@ class QueryBuilder
         self::$query .= " WHERE ";
     }
 
+    public static function add_or(){
+
+        if(strpos(self::$query,"WHERE") !== false){
+            self::$query .= " OR ";
+        }else{
+            throw new FrameworkException("To use or_where is necessary use where() before");
+        }
+
+    }
+
     public static function add_select($fields = "*",$table){
-        self::$query = "SELECT $fields FROM $table".self::$query;
+        self::$query = "SELECT $fields FROM $table ".self::$query;
     }
 
     public static function limit($limit){
@@ -53,6 +63,49 @@ class QueryBuilder
         self::$query .= implode(" $separator ",$query);
     }
 
+    public static function make_insert(array $arr,$table_name){
+        $keys   = self::get_query_keys($arr);
+        $values = self::get_query_values($arr);
+
+        self::$query = "INSERT INTO $table_name ($keys) VALUES ($values)";
+    }
+
+    public static function make_insert_batch(array $arr,$table_name){
+        $greater_arr    = self::get_greater_array($arr);
+        $keys           = self::get_query_keys($greater_arr);
+        $tmp            = [];
+
+        foreach ($arr as $attributes) {
+            $prev = [];
+            foreach ($greater_arr as $key => $value) {
+                $prev[] = isset($attributes[$key])?$attributes[$key]:null;
+            }
+
+            $tmp[] = self::get_query_values($prev);
+        }
+
+        $values = implode(') , (', $tmp);
+
+        self::$query = "INSERT INTO $table_name ($keys) VALUES ($values)";
+
+    }
+
+    public static function make_update(array $arr,$table_name){
+
+        $values = self::assoc_to_query($arr);
+
+        self::$query = "UPDATE $table_name SET $values ".self::$query;
+    }
+
+    private static function assoc_to_query($arr,$separator = ','){
+        $result = [];
+        foreach ($arr as $key => $value){
+            $result[] = self::get_equal_query($key,'=',$value);
+        }
+
+        return implode($separator,$result);
+    }
+
     private static function get_equal_query($key,$operator = "=",$value){
         $query = "";
         switch (gettype($value)){
@@ -74,33 +127,6 @@ class QueryBuilder
         }
         return $query;
     }
-
-    public static function make_insert(array $arr,$table_name){
-
-        if(Helper::is_assoc($arr)){
-            $keys   = self::get_query_keys($arr);
-
-            $values = self::get_query_values($arr);
-
-        }else{
-            $greater_arr    = self::get_greater_array($arr);
-            $keys           = self::get_query_keys($greater_arr);
-            $tmp            = [];
-
-            foreach ($arr as $attributes) {
-                $prev = [];
-                foreach ($greater_arr as $key => $value) {
-                    $prev[] = isset($attributes[$key])?$attributes[$key]:null;
-                }
-
-                $tmp[] = self::get_query_values($prev);
-            }
-            $values = implode(') , (', $tmp);
-        }
-
-        self::$query = "INSERT INTO $table_name ($keys) VALUES ($values)";
-    }
-
     private static function get_query_keys(array $arr){
         return  implode(',',array_keys($arr));
     }
