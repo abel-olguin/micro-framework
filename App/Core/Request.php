@@ -19,6 +19,7 @@ class Request
     }
 
     public function get($key){
-        return isset($this->attributes["key"])?$this->attributes["key"]:null;
+
+        return isset($this->attributes[$key])?$this->attributes[$key]:null;
     }
 }

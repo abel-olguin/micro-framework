@@ -8,10 +8,8 @@
  */
 use \MicroFramework\Core\Router;
 
-Router::get("my/[new_arg]/url",function (){
-    echo 1;
-});
+Router::get("my/[arg]/url",'Controller#sample');
 
-Router::post("my/url/other",function (){
-    return 1;
+Router::get("my/url/other",function (){
+    echo 1;
 });

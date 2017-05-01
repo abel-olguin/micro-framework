@@ -13,7 +13,7 @@ namespace MicroFramework\Core;
 class RouterManager
 {
     private $uri,$query,$routes;
-
+    private $controller_namespace = 'MicroFramework\Http\Controllers\\';
     public function __construct()
     {
         $this->uri    = UrlManager::get_uri();
@@ -47,7 +47,19 @@ class RouterManager
             if(is_callable($callback)){
                 $callback(new Request($arguments));
             }elseif(is_string($callback)){
-                //other time
+                $callback = explode('#',$callback);
+
+                if(count($callback) != 2){
+                    throw new FrameworkException("you need 2 args in route callback Controller#action");
+                }
+                $callback[0] = $this->controller_namespace.$callback[0];
+
+                if(!method_exists(...$callback)){
+                    throw new FrameworkException("Method or class not exists: ".implode('::',$callback));
+                }
+
+                $controller = new $callback[0]();
+                $controller->{$callback[1]}(new Request($arguments));
             }else{
                 throw new FrameworkException("error");
             }
