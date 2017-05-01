@@ -10,8 +10,12 @@
 
 require_once(__DIR__ . '/../vendor/autoload.php');
 
+/*
 use MicroFramework\Models\Sample;
 
 $wea = Sample::first();
+*/
 
-var_dump($wea);
+$app = new \MicroFramework\Core\App();
+
+$app->run();

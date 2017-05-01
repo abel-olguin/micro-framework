@@ -12,5 +12,7 @@ namespace MicroFramework\Core;
 
 class App
 {
-
+    public function run(){
+        new RouterManager();
+    }
 }

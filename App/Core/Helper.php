@@ -52,4 +52,12 @@ class Helper
         return new $class($args);
     }
 
+    public static function is_argument($string){
+         return preg_match("/\[([^\]]*)\]/", $string);
+    }
+
+    public static function remove_brackets($string){
+        $replacement = '\1';
+        return  preg_replace("/\[([^\]]*)\]/", $replacement, $string);
+    }
 }

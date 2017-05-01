@@ -10,7 +10,7 @@
     ],
     "require": {},
     "autoload":{
-        "files":["App/Core/Config.php"],
+        "files":["App/Core/Config.php","App/Http/routes.php"],
         "psr-4": {
             "MicroFramework\\": "App/"
         }
