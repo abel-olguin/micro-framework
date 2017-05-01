@@ -27,7 +27,15 @@ class Router
     }
 
     public static function post($url,$callback){
-        self::$instance->urls[] = ['method' => 'post','url' => array_filter(explode('/',$url)),'calback' => $callback];
+        self::$instance->urls[] = ['method' => 'post','url' => array_filter(explode('/',$url)),'callback' => $callback];
+    }
+
+    public static function put($url,$callback){
+        self::$instance->urls[] = ['method' => 'put','url' => array_filter(explode('/',$url)),'callback' => $callback];
+    }
+
+    public static function delete($url,$callback){
+        self::$instance->urls[] = ['method' => 'delete','url' => array_filter(explode('/',$url)),'callback' => $callback];
     }
 
     public static function get_all_urls(){

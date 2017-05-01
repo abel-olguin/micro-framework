@@ -9,7 +9,3 @@
 use \MicroFramework\Core\Router;
 
 Router::get("my/[arg]/url",'Controller#sample');
-
-Router::get("my/url/other",function (){
-    echo 1;
-});
