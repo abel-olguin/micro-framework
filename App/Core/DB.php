@@ -50,6 +50,10 @@ class DB
         }
     }
 
+    protected function query($query){
+        return $this->connection->query($query);
+    }
+
     protected function db_update($query){
         if($this->connection->query($query)){
             return true;

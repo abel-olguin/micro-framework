@@ -42,7 +42,8 @@ class RouterManager
         }
         if(count($posible_second)){
             $route      = $posible_second[count($posible_second)-1];
-            $arguments  = $this->get_arguments($route['url'],$this->uri);
+            $arguments  = $this->get_url_arguments($route['url'],$this->uri);
+            $arguments  = array_merge($arguments,$this->get_body_arguments($route["method"]));
             $callback   = $route['callback'];
             if(is_callable($callback)){
                 $callback(new Request($arguments));
@@ -82,7 +83,7 @@ class RouterManager
         return $count == count($url);
     }
 
-    private function get_arguments(array $url,array $uri){
+    private function get_url_arguments(array $url,array $uri){
         $args = [];
         foreach ($url as $index => $argument){
 
@@ -92,6 +93,20 @@ class RouterManager
         }
 
         return $args;
+    }
+
+    private function get_body_arguments($method){
+        $params = [];
+        switch (strtoupper($method)){
+            case "PUT":
+                parse_str(file_get_contents('php://input'),$params);
+                $params = array_merge($params,$_REQUEST);
+                break;
+            default:
+                $params = $_REQUEST;
+                break;
+        }
+        return $params;
     }
 
 

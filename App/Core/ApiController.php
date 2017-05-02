@@ -28,8 +28,8 @@ class ApiController
     }
 
     private function set_header($code){
+        header('Content-Type: application/json');
         http_response_code($code);
-
     }
 
     private function json_response($arr){

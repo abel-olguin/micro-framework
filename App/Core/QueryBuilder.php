@@ -97,6 +97,15 @@ class QueryBuilder
         self::$query = "UPDATE $table_name SET $values ".self::$query;
     }
 
+    public static function make_delete($id,$table_name){
+
+        self::$query = "DELETE FROM $table_name WHERE id = $id";
+    }
+
+    public function clean_query(){
+        self::$query = '';
+    }
+
     private static function assoc_to_query($arr,$separator = ','){
         $result = [];
         foreach ($arr as $key => $value){

@@ -30,37 +30,19 @@ abstract class Model extends DB
      * Save new instance in db
      */
     public static function create(array $atts){
-        $class      = get_called_class();
-        $instance   = new $class($atts);
+        if(Helper::is_assoc($atts)){
 
-        $id = $instance->save();
-
-        $instance->set_attribute("id",$id);
-
-        return $instance;
-    }
-
-    /**
-     * @param array $arr
-     * @return array|mixed
-     *
-     * save instance in db, diferent to create this function accepts multiple
-     * attributes array and returns collection of instances from model object
-     */
-    public static function insert(array $arr){
-        if(Helper::is_assoc($arr)){
-                
-                return self::new_insert_instance($arr);
+            return self::new_insert_instance($atts);
         }else{
             $instances = [];
-            foreach ($arr as $attributes) {
+            foreach ($atts as $attributes) {
                 $instance = self::new_insert_instance($attributes);
                 $instances[] = $instance;
             }
             return $instances;
         }
-                    
     }
+
 
     /**
      * @param array $arr
@@ -68,7 +50,7 @@ abstract class Model extends DB
      *
      * Only multiple insertions in db
      */
-    public static function insert_batch(array $arr){
+    public static function create_batch(array $arr){
         $instance = static::new_instance();
 
         $instance->only_masive_assoc($arr);
@@ -126,6 +108,7 @@ abstract class Model extends DB
      * get results of query
      */
     public function get(){
+
         QueryBuilder::add_select("*",$this->get_table_name());
         $results = null;
         foreach ($this->get_results(QueryBuilder::get_query()) as $atts){
@@ -142,6 +125,7 @@ abstract class Model extends DB
      * Save update values
      */
     public function update(array $arr){
+
         $this->only_assoc($arr);
         QueryBuilder::make_update($arr,$this->get_table_name());
 
@@ -149,6 +133,7 @@ abstract class Model extends DB
     }
 
     public static function first(){
+
         $instance =  self::new_instance();
         QueryBuilder::add_select("*",$instance->get_table_name(),1);
         QueryBuilder::limit(1);
@@ -163,6 +148,20 @@ abstract class Model extends DB
      * Save attributes in db
      */
     public function save(){
+        QueryBuilder::clean_query();
+
+        $id = $this->get_attribute_value("id");
+        if($id){
+
+            QueryBuilder::add_where();
+            QueryBuilder::array_to_query([["id","=", $id]],"OR");
+            unset($this->attributes["id"]);
+            QueryBuilder::make_update($this->attributes,$this->table_name);
+            $this->db_update(QueryBuilder::get_query());
+            $this->attributes["id"] = $id;
+            return $this;
+        }
+
         QueryBuilder::make_insert($this->attributes,$this->get_table_name());
         $id         = $this->db_insert(QueryBuilder::get_query());
         if(is_bool($id) === false){
@@ -175,6 +174,11 @@ abstract class Model extends DB
         return $this;
     }
 
+    public static function delete($id){
+        $instance = static::new_instance();
+        QueryBuilder::make_delete($id,$instance->get_table_name());
+        $instance->query(QueryBuilder::get_query());
+    }
 
     public function get_table_name(){
         return $this->table_name;

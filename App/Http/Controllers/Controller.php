@@ -9,6 +9,6 @@ class Controller extends ApiController
 
     public function sample(Request $request){
 
-        $this->ok([$request->get("arg")]);
+        $this->ok(["data" =>$request->all()]);
     }
 }

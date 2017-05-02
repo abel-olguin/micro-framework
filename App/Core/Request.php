@@ -22,4 +22,8 @@ class Request
 
         return isset($this->attributes[$key])?$this->attributes[$key]:null;
     }
+
+    public function all(){
+        return $this->attributes;
+    }
 }
